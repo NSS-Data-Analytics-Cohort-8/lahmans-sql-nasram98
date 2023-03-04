@@ -7,21 +7,103 @@ from homegames
 
 2. Find the name and height of the shortest player in the database. How many games did he play in? What is the name of the team for which he played?
 
-select *
+select playerid
 From People
+full join managershalf
+Using (playerid)
+
+Select *
+From managershalf
 
 SELECT namelast, namefirst, height, playerid
 FROM people 
 WHERE height = (SELECT MIN(height) FROM people)
 
 
+SELECT playerid
+FROM fieldingofsplit
+
+
+SELECT p.namelast, p.namefirst, p.height, p.playerid, m.teamid, m.g
+FROM people p
+Full JOIN managershalf m
+ON p.playerid = m.playerid
+WHERE p.height = (SELECT MIN(height) FROM people)
+ORDER BY p.playerid = 'gaedeed01' DESC, p.height ASC
+
+
+SELECT p.namelast, p.namefirst, p.height, p.playerid, b.teamid, b.g
+FROM people as p
+inner JOIN batting as b
+ON p.playerid = b.playerid
+WHERE p.height = (SELECT MIN(height) FROM people)
+ORDER BY p.playerid = 'gaedeed01' DESC, p.height ASC  ---- this could be the correct table showing eddie Gaedel being the shortest player ever, playing only one game on the SLA team. 
+
+
 3. Find all players in the database who played at Vanderbilt University. Create a list showing each player’s first and last names as well as the total salary they earned in the major leagues. Sort this list in descending order by the total salary earned. Which Vanderbilt player earned the most money in the majors?
-	
+
+select *
+from collegeplaying
+where schoolid = 'tennessee'
+
+select *
+from schools
+where schoolstate = 'TN'
+
+
+SELECT p.namefirst, p.namelast, s.total_salary
+FROM people p
+FULL JOIN collegeplaying c 
+ON p.playerid = c.playerid 
+FULL JOIN 
+(
+    SELECT playerid, SUM(salary) AS total_salary 
+    FROM salaries 
+    GROUP BY playerid
+) s 
+ON p.playerid = s.playerid
+FULL JOIN schools sc
+ON c.schoolid = sc.schoolid
+WHERE sc.schoolname LIKE '%Vanderbilt%'
+GROUP BY p.playerid, s.total_salary
+ORDER BY s.total_salary DESC NULLS LAST;
 
 4. Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.
-   
+
+select *
+from fielding
+
+SELECT 
+    CASE 
+        WHEN pos = 'OF' THEN 'Outfield'
+        WHEN pos IN ('SS', '1B', '2B', '3B') THEN 'Infield'
+        WHEN pos IN ('P', 'C') THEN 'Battery'
+    END AS position_group,
+    SUM(po) AS putouts
+FROM 
+    fielding
+WHERE 
+    yearid = 2016
+GROUP BY 
+    position_group
+ORDER BY 
+    putouts DESC;
+
 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
-   
+
+select *
+from teams
+
+SELECT
+  CONCAT(CAST((yearid/10)*10 AS varchar(4)), 's') AS decade,
+  ROUND(AVG(so::numeric)/AVG(g), 2) AS strikeouts_by_batters,
+  ROUND(AVG(hr::numeric)/AVG(g), 2) AS home_runs_per_game
+FROM teams
+WHERE yearid >= 1920
+GROUP BY decade
+ORDER BY decade ASC;
+
+
 
 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
 	
