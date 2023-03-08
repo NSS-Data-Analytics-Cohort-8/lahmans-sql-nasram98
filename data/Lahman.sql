@@ -103,18 +103,70 @@ WHERE yearid >= 1920
 GROUP BY decade
 ORDER BY decade ASC;
 
+------- A different method....
 
+SELECT SUM(hr)/(COUNT(g)/2) AS avg_HR_per_game, yearid,
+CASE WHEN yearid BETWEEN 1920 AND 1929 THEN '1920s'
+	WHEN yearid BETWEEN 1930 AND 1939 THEN '1930s'
+	WHEN yearid BETWEEN 1940 AND 1949 THEN '1940s'
+	WHEN yearid BETWEEN 1950 AND 1959 THEN '1950s'
+	WHEN yearid BETWEEN 1960 AND 1969 THEN '1960s'
+	WHEN yearid BETWEEN 1970 AND 1979 THEN '1970s'
+	WHEN yearid BETWEEN 1980 AND 1989 THEN '1980s'
+	WHEN yearid BETWEEN 1990 AND 1999 THEN '1990s'
+	WHEN yearid BETWEEN 2000 AND 2009 THEN '2000s'
+	WHEN yearid BETWEEN 2010 AND 2019 THEN '2010s'
+	END AS decade
+FROM teams
+GROUP BY yearid
+ORDER BY yearid DESC;
 
 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
-	
+
+SELECT *
+From batting
+full join people
+USING(playerid)
+
+		
+SELECT p.namefirst, p.namelast,
+       CAST(b.sb AS FLOAT) / (b.sb + b.cs ) AS success_rate
+FROM batting b
+JOIN people p ON b.playerid = p.playerid
+WHERE b.yearid = 2016 AND b.sb >= 20
+ORDER BY success_rate DESC
+
 
 7.  From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
 
 
 8. Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.
+select *
+From homegames
+
+-- Top 5 average attendance per game in 2016
+SELECT park, team, AVG(attendance/games) AS avg_attendance
+FROM homegames
+WHERE year = 2016 AND games >= 10
+GROUP BY park, team
+ORDER BY avg_attendance DESC
+LIMIT 5;
+
+-- Lowest 5 average attendance per game in 2016
+SELECT park, team, AVG(attendance/games) AS avg_attendance
+FROM homegames
+WHERE year = 2016 AND games >= 10
+GROUP BY park, team
+ORDER BY avg_attendance ASC
+LIMIT 5;
 
 
 9. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.
+
+select *
+from people
+
+
 
 10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players' first and last names and the number of home runs they hit in 2016.
 
